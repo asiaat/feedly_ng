@@ -111,6 +111,8 @@ class FeedlyMngr(object):
 
     def __parse_feed(self,inp_feed):
 
+        print inp_feed
+
         try:    title = inp_feed['title']
         except: title = ""
 
@@ -129,16 +131,13 @@ class FeedlyMngr(object):
         sentiment       = self.sentiment(content_en)
         feedly_category = str(inp_feed['categories'][0]['label']).replace(' ','')
 
-        el_id = inp_feed['fingerprint']
-        #print el_id
 
-        json_data = {
-            #'originid':         inp_feed['originid'],
+        data_json = {
             'type':             inp_feed['alternate'][0]['type'],
             'origin_url':       inp_feed['origin']['htmlUrl'],
             'origin_title':     inp_feed['origin']['title'],
             'title':            title,
-            'title_en':         self.translate(detect_lang,'en',title),
+            'title_en':         self.translate(detect_lang, 'en', title),
             'author':           author,
             'fdl_category':     feedly_category,
             'timestamp':        "%s" % time_stamp,
@@ -147,15 +146,14 @@ class FeedlyMngr(object):
             'lang':             detect_lang,
             'sentiment_pol':    sentiment.get('pol'),
             'sentiment_sub':    sentiment.get('sub'),
-        }
-        print(json_data)
 
+        }
 
         try:
             elastic_res = self.__elastic.index( index       = self.__elastic_indx,
                                                 doc_type    = feedly_category,
                                                 id          = inp_feed['fingerprint'],
-                                                body        = json_data)
+                                                body        = data_json)
 
             print(elastic_res)
         except:
