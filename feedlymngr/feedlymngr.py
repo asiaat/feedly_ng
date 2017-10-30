@@ -162,22 +162,3 @@ class FeedlyMngr(object):
 
 
 
-if __name__ == '__main__':
-
-    fm = FeedlyMngr('../conf/feedly.conf')
-    print "helo"
-
-
-    categories = fm.feedly_categories()
-    for cat in categories:
-        print cat.get('label')
-
-
-    for category  in categories:
-        if category.get('label') == 'Kataloonia':
-            print fm.feeds_from_category(category)
-            #print  category.get('label')
-
-
-
-    #fm.feeds_from_category('Kataloonia')
