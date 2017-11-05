@@ -7,6 +7,7 @@ from elasticsearch import Elasticsearch
 import time
 import textblob
 from textblob import TextBlob
+import re
 
 
 class FeedlyMngr(object):
@@ -26,6 +27,9 @@ class FeedlyMngr(object):
         self.__elastic      = Elasticsearch(cnf.get('elastic','url'))
         self.__elastic_indx = cnf.get('elastic','index')
         #print(elastic_url)
+
+        # regexp for image detection
+        self.__pattern_images = re.compile('(.jpg|.png|.jepg|.gif|.tiff)')
 
 
 
@@ -89,6 +93,17 @@ class FeedlyMngr(object):
 
         return sentim
 
+    def detect_images(self,inp_txt):
+
+        image_urls = []
+
+        urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', inp_txt)
+
+        for url in urls:
+            if self.__pattern_images.search(url):
+                image_urls.append(url)
+
+        return image_urls
 
 
     #
@@ -108,6 +123,15 @@ class FeedlyMngr(object):
         for i in result.get('items', []):
             #print i
             self.__parse_feed(i)
+
+    def debug_feeds(self,inp_cat):
+
+        result = self.__feedly.get_feed_content(self.__FEEDLY_CLIENT_SECRET,
+                                                inp_cat.get('id'), False)
+
+        for i in result.get('items', []):
+            print i
+            #self.__parse_feed(i)
 
     def __parse_feed(self,inp_feed):
 
